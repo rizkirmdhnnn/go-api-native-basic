@@ -16,7 +16,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	var books []models.Book
 	var booksResponse []models.BookResponse
 
-	if err := config.DB.Joins("Author").Find(&books).Find(&booksResponse).Error; err != nil {
+	if err := config.DB.Joins("Author").Joins("Category").Find(&books).Find(&booksResponse).Error; err != nil {
 		helper.Response(w, 500, "Error Table Not Found", nil)
 	}
 	helper.Response(w, 200, "List Books", booksResponse)
@@ -41,6 +41,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var category models.Category
+	if err := config.DB.First(&category, book.CategoryID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			helper.Response(w, 404, "Category Not Found", nil)
+			return
+		}
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+
 	if err := config.DB.Create(&book).Error; err != nil {
 		helper.Response(w, 500, err.Error(), nil)
 		return
@@ -56,7 +66,7 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
 	var bookResponse models.BookResponse
 
-	if err := config.DB.Joins("Author").First(&book, id).First(&bookResponse, id).Error; err != nil {
+	if err := config.DB.Joins("Author").Joins("Category").First(&book, id).First(&bookResponse, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helper.Response(w, 404, "Books Not Found", nil)
 			return
@@ -65,7 +75,7 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helper.Response(w, 200, "Detail Book", book)
+	helper.Response(w, 200, "Detail Book", bookResponse)
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {

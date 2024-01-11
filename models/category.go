@@ -9,7 +9,7 @@ type Category struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type CategoryResponse struct {
+type CategoryBookResponse struct {
 	ID          uint   `gorm:"primaryKey" json:"id"`
-	Description string `json:"category_name"`
+	Description string `json:"description"`
 }
