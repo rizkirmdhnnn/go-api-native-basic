@@ -7,4 +7,5 @@ func RouteIndex(r *mux.Router) {
 	AuthorRoutes(api)
 	BooksRoute(api)
 	CategoryRoute(api)
+	MembersRoute(api)
 }
