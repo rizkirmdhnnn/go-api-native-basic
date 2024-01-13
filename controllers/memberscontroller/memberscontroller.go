@@ -59,6 +59,7 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 	helper.Response(w, 200, "Detail Member", member)
 }
 
+// Update TODO buat pengecekan buat username ganda
 func Update(w http.ResponseWriter, r *http.Request) {
 	idParams := mux.Vars(r)["id"]
 	id, _ := strconv.Atoi(idParams)
