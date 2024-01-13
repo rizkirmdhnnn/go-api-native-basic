@@ -10,6 +10,7 @@ type Book struct {
 	CategoryID  uint      `json:"category_id"`
 	Category    Category  `gorm:"foreignKey:CategoryID" json:"category"`
 	Description string    `json:"description"`
+	Stocks      int       `json:"stocks"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -22,6 +23,7 @@ type BookResponse struct {
 	CategoryID  uint                 `json:"-"`
 	Category    CategoryBookResponse `gorm:"foreignKey:CategoryID" json:"category"`
 	Description string               `json:"description"`
+	Stocks      int                  `json:"stocks"`
 	CreatedAt   time.Time            `json:"created_at"`
 	UpdatedAt   time.Time            `json:"updated_at"`
 }
