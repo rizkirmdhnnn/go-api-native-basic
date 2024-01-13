@@ -95,17 +95,17 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	if err := config.DB.Where("username = ? AND id != ?", admin.Username, id).First(&models.Admin{}).Error; err == nil {
+		helper.Response(w, 400, "Username already exists", nil)
+		return
+	}
+
 	hashedPassword, err := helper.HashPassword(admin.Password)
 	if err != nil {
 		helper.Response(w, 500, err.Error(), nil)
 		return
 	}
 	admin.Password = hashedPassword
-
-	if err := config.DB.Where("username = ?", admin.Username).First(&admin).Error; err == nil {
-		helper.Response(w, 400, "Username already exists", nil)
-		return
-	}
 
 	if err := config.DB.Where("id = ?", id).Updates(&admin).Error; err != nil {
 		helper.Response(w, 500, err.Error(), nil)

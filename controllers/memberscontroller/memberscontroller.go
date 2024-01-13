@@ -59,7 +59,6 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 	helper.Response(w, 200, "Detail Member", member)
 }
 
-// Update TODO buat pengecekan buat username ganda
 func Update(w http.ResponseWriter, r *http.Request) {
 	idParams := mux.Vars(r)["id"]
 	id, _ := strconv.Atoi(idParams)
@@ -82,6 +81,11 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
+
+	if err := config.DB.Where("username = ? AND id != ?", member.Username, id).First(&models.Member{}).Error; err == nil {
+		helper.Response(w, 400, "Username already exists", nil)
+		return
+	}
 
 	if err := config.DB.Where("id = ?", id).Updates(&member).Error; err != nil {
 		helper.Response(w, 500, err.Error(), nil)
