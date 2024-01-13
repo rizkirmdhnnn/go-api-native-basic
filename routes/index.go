@@ -8,4 +8,5 @@ func RouteIndex(r *mux.Router) {
 	BooksRoute(api)
 	CategoryRoute(api)
 	MembersRoute(api)
+	AdminRoutes(api)
 }
