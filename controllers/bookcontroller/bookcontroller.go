@@ -113,6 +113,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	var category models.Category
+	if bookPayload.CategoryID != 0 {
+		if err := config.DB.First(&category, bookPayload.CategoryID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				helper.Response(w, 404, "Category Not Found", nil)
+				return
+			}
+			helper.Response(w, 500, err.Error(), nil)
+			return
+		}
+	}
+
 	if err := config.DB.Where("id = ?", id).Updates(&bookPayload).Error; err != nil {
 		helper.Response(w, 500, err.Error(), nil)
 		return
