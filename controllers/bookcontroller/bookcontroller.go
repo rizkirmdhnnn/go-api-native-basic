@@ -153,3 +153,23 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	helper.Response(w, 200, "Success Delete Book", nil)
 
 }
+
+func SearchBook(w http.ResponseWriter, r *http.Request) {
+	var books []models.Book
+	var booksResponse []models.BookResponse
+
+	title := r.URL.Query().Get("title")
+
+	if title == "" {
+		helper.Response(w, 404, "Please add title params!!", nil)
+		return
+	}
+
+	titlePattern := "%" + title + "%"
+	if err := config.DB.Where("title LIKE ?", titlePattern).Joins("Author").Joins("Category").Find(&books).Find(&booksResponse).Error; err != nil {
+		helper.Response(w, 404, err.Error(), nil)
+		return
+	}
+
+	helper.Response(w, 200, "book found", booksResponse)
+}
