@@ -173,3 +173,12 @@ func SearchBook(w http.ResponseWriter, r *http.Request) {
 
 	helper.Response(w, 200, "book found", booksResponse)
 }
+
+func TotalBooks(w http.ResponseWriter, r *http.Request) {
+	var books []models.Book
+	var total models.TotalBooks
+	if err := config.DB.Model(&books).Count(&total.Total).Error; err != nil {
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+}
