@@ -181,4 +181,5 @@ func TotalBooks(w http.ResponseWriter, r *http.Request) {
 		helper.Response(w, 500, err.Error(), nil)
 		return
 	}
+	helper.Response(w, 200, "Success to get total books", total)
 }
