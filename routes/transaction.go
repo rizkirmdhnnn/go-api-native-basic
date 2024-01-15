@@ -8,4 +8,5 @@ import (
 func TransactionRouter(r *mux.Router) {
 	router := r.PathPrefix("/transaction").Subrouter()
 	router.HandleFunc("", transactioncontroller.Create).Methods("POST")
+	router.HandleFunc("/{id}/return", transactioncontroller.Update).Methods("PUT")
 }

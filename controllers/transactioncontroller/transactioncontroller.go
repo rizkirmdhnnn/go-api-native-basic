@@ -3,11 +3,13 @@ package transactioncontroller
 import (
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"go-api-native-basic/config"
 	"go-api-native-basic/helper"
 	"go-api-native-basic/models"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -74,4 +76,74 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helper.Response(w, 201, "Success create transaction", nil)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	idParams := mux.Vars(r)["id"]
+	id, _ := strconv.Atoi(idParams)
+
+	var transaction models.Transactions
+
+	if err := config.DB.First(&transaction, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			helper.Response(w, 404, "Transaction with that id are not found", nil)
+			return
+		}
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	if err := config.DB.
+		Where("member_id = ? AND book_id = ? AND return_date != ?", transaction.MemberID, transaction.BookID, "").
+		First(&transaction).
+		Error; err == nil {
+		helper.Response(w, 409, "Book has been returned!", nil)
+		return
+	}
+
+	transaction.ReturnDate = time.Now().Format("02-01-2006")
+
+	borrowingDate, err := time.Parse("02-01-2006", transaction.BorrowingDate)
+	if err != nil {
+		helper.Response(w, 500, "Cant parsing borrowingDate", nil)
+		return
+	}
+
+	returnDate, err := time.Parse("02-01-2006", transaction.ReturnDate)
+	if err != nil {
+		helper.Response(w, 500, "Cant parsing borrowingDate", nil)
+		return
+	}
+
+	totalDays := int32(returnDate.Sub(borrowingDate).Hours() / 24)
+	lateDay := totalDays - config.ENV.MAXLOANDURATION
+
+	if lateDay < 0 {
+		lateDay = 0
+	}
+
+	if lateDay >= config.ENV.MAXLOANDURATION {
+		transaction.Penalties += (lateDay - config.ENV.MAXLOANDURATION) * config.ENV.PENALTYPERDAY
+	}
+
+	condition := r.URL.Query().Get("condition")
+	switch condition {
+	case "broken":
+		transaction.Penalties += config.ENV.PENALTYBROKEN
+	case "missing":
+		transaction.Penalties += config.ENV.PINALTYLOST
+	default:
+	}
+
+	if err := config.DB.Where("id = ?", transaction.ID).Updates(&transaction).Error; err != nil {
+		helper.Response(w, 404, err.Error(), nil)
+		return
+	}
+
+	var returnResponse models.TransactionReturnResponse
+
+	returnResponse.LateDay = lateDay
+	returnResponse.Penalty = transaction.Penalties
+
+	helper.Response(w, 201, "Successfully returned the book", returnResponse)
 }

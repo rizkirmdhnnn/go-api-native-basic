@@ -31,3 +31,8 @@ type TransactionsResponse struct {
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
+
+type TransactionReturnResponse struct {
+	LateDay int32 `json:"late_day"`
+	Penalty int32 `json:"penalty"`
+}
