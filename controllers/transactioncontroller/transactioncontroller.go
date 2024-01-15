@@ -17,6 +17,19 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if transaction.Status != "Borrowing" && transaction.Status != "Returned" {
+		helper.Response(w, 400, "Only accepts status Borrowing or Returned", nil)
+		return
+	}
+
+	if err := config.DB.
+		Where("member_id = ? AND book_id = ? AND status = ?", transaction.MemberID, transaction.BookID, "Borrowing").
+		First(&transaction).
+		Error; err == nil {
+		helper.Response(w, 409, "Transaction with the same member_id, book_id, and status 'Borrowing' already exists", nil)
+		return
+	}
+
 	var member models.Member
 	if err := config.DB.First(&member, transaction.MemberID).Error; err != nil {
 		helper.Response(w, 404, err.Error(), nil)
