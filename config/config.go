@@ -6,12 +6,16 @@ import (
 )
 
 type Config struct {
-	PORT        string
-	DB_HOST     string
-	DB_USER     string
-	DB_PASSWORD string
-	DB_NAME     string
-	DB_PORT     string
+	PORT            string
+	DB_HOST         string
+	DB_USER         string
+	DB_PASSWORD     string
+	DB_NAME         string
+	DB_PORT         string
+	PENALTYPERDAY   int32
+	MAXLOANDURATION int32
+	PENALTYBROKEN   int32
+	PINALTYLOST     int32
 }
 
 var ENV Config
