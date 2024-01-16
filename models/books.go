@@ -28,6 +28,17 @@ type BookResponse struct {
 	UpdatedAt   time.Time            `json:"updated_at"`
 }
 
+type BookResponseTransaction struct {
+	ID          uint                 `json:"id"`
+	Title       string               `json:"title"`
+	AuthorID    uint                 `json:"-"`
+	Author      AuthorBookResponse   `gorm:"foreignKey:AuthorID" json:"author"`
+	CategoryID  uint                 `json:"-"`
+	Category    CategoryBookResponse `gorm:"foreignKey:CategoryID" json:"category"`
+	Description string               `json:"description"`
+	Stocks      int                  `json:"stocks"`
+}
+
 type TotalBooks struct {
 	Total int64 `json:"total"`
 }

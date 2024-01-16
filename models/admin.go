@@ -10,3 +10,9 @@ type Admin struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type AdminResponse struct {
+	ID       uint   `gorm:"primaryKey" json:"id"`
+	Name     string `gorm:"type:varchar(100)" json:"name"`
+	Username string `gorm:"type:varchar(100)" json:"username"`
+}

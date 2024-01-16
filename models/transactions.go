@@ -18,18 +18,18 @@ type Transactions struct {
 }
 
 type TransactionsResponse struct {
-	ID            uint      `gorm:"primaryKey" json:"id"`
-	MemberID      uint      `json:"-"`
-	Member        Member    `gorm:"foreignKey:MemberID" json:"member"`
-	BookID        uint      `json:"-"`
-	Book          Book      `gorm:"foreignKey:BookID" json:"book"`
-	AdminID       uint      `json:"-"`
-	Admin         Admin     `gorm:"foreignKey:AdminID" json:"admin"`
-	BorrowingDate time.Time `json:"borrowing_date"`
-	ReturnDate    time.Time `json:"return_date"`
-	Penalties     int32     `json:"penalties"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID            uint                      `gorm:"primaryKey" json:"id"`
+	MemberID      uint                      `json:"-"`
+	Member        MemberTransactionResponse `gorm:"foreignKey:MemberID" json:"member"`
+	BookID        uint                      `json:"-"`
+	Book          BookResponseTransaction   `gorm:"foreignKey:BookID" json:"book"`
+	AdminID       uint                      `json:"-"`
+	Admin         AdminResponse             `gorm:"foreignKey:AdminID" json:"admin"`
+	BorrowingDate string                    `json:"borrowing_date"`
+	ReturnDate    string                    `json:"return_date"`
+	Penalties     int32                     `json:"penalties"`
+	CreatedAt     time.Time                 `json:"created_at"`
+	UpdatedAt     time.Time                 `json:"updated_at"`
 }
 
 type TransactionReturnResponse struct {

@@ -147,3 +147,22 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	helper.Response(w, 201, "Successfully returned the book", returnResponse)
 }
+
+func Index(w http.ResponseWriter, r *http.Request) {
+	var transactions []models.Transactions
+	var transactionResponse []models.TransactionsResponse
+
+	if err := config.DB.
+		Joins("Member").
+		Joins("Book.Author").
+		Joins("Book.Category").
+		Joins("Admin").
+		Find(&transactions).
+		Find(&transactionResponse).
+		Error; err != nil {
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	helper.Response(w, 200, "Success get all transactions", transactionResponse)
+}
