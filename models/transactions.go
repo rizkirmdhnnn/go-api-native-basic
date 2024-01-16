@@ -13,6 +13,7 @@ type Transactions struct {
 	BorrowingDate string    `json:"borrowing_date"`
 	ReturnDate    string    `json:"return_date"`
 	Penalties     int32     `json:"penalties"`
+	Condition     string    `json:"condition"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
@@ -28,6 +29,7 @@ type TransactionsResponse struct {
 	BorrowingDate string                    `json:"borrowing_date"`
 	ReturnDate    string                    `json:"return_date"`
 	Penalties     int32                     `json:"penalties"`
+	Condition     string                    `json:"condition"`
 	CreatedAt     time.Time                 `json:"created_at"`
 	UpdatedAt     time.Time                 `json:"updated_at"`
 }

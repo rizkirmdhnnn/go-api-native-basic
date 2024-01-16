@@ -13,6 +13,25 @@ import (
 	"time"
 )
 
+func Index(w http.ResponseWriter, r *http.Request) {
+	var transactions []models.Transactions
+	var transactionResponse []models.TransactionsResponse
+
+	if err := config.DB.
+		Joins("Member").
+		Joins("Book.Author").
+		Joins("Book.Category").
+		Joins("Admin").
+		Find(&transactions).
+		Find(&transactionResponse).
+		Error; err != nil {
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	helper.Response(w, 200, "Success get all transactions", transactionResponse)
+}
+
 func Create(w http.ResponseWriter, r *http.Request) {
 	var transaction models.Transactions
 
@@ -82,6 +101,12 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	idParams := mux.Vars(r)["id"]
 	id, _ := strconv.Atoi(idParams)
 
+	condition := r.URL.Query().Get("condition")
+	if condition == "" {
+		helper.Response(w, 400, "Missing parameter condition", nil)
+		return
+	}
+
 	var transaction models.Transactions
 
 	if err := config.DB.First(&transaction, id).Error; err != nil {
@@ -126,7 +151,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		transaction.Penalties += (lateDay - config.ENV.MAXLOANDURATION) * config.ENV.PENALTYPERDAY
 	}
 
-	condition := r.URL.Query().Get("condition")
+	transaction.Condition = condition
 	switch condition {
 	case "broken":
 		transaction.Penalties += config.ENV.PENALTYBROKEN
@@ -148,21 +173,23 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	helper.Response(w, 201, "Successfully returned the book", returnResponse)
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	var transactions []models.Transactions
-	var transactionResponse []models.TransactionsResponse
+func Delete(w http.ResponseWriter, r *http.Request) {
+	idParams := mux.Vars(r)["id"]
+	id, _ := strconv.Atoi(idParams)
 
-	if err := config.DB.
-		Joins("Member").
-		Joins("Book.Author").
-		Joins("Book.Category").
-		Joins("Admin").
-		Find(&transactions).
-		Find(&transactionResponse).
-		Error; err != nil {
-		helper.Response(w, 500, err.Error(), nil)
+	var transaction models.Transactions
+	response := config.DB.Delete(&transaction, id)
+
+	if response.Error != nil {
+		helper.Response(w, 500, response.Error.Error(), nil)
 		return
 	}
 
-	helper.Response(w, 200, "Success get all transactions", transactionResponse)
+	if response.RowsAffected == 0 {
+		helper.Response(w, 404, "Transaction Not Found", nil)
+		return
+	}
+
+	helper.Response(w, 200, "Success Delete Member", nil)
+
 }

@@ -10,4 +10,5 @@ func TransactionRouter(r *mux.Router) {
 	router.HandleFunc("", transactioncontroller.Index).Methods("GET")
 	router.HandleFunc("", transactioncontroller.Create).Methods("POST")
 	router.HandleFunc("/{id}/return", transactioncontroller.Update).Methods("PUT")
+	router.HandleFunc("/{id}/delete", transactioncontroller.Delete).Methods("DELETE")
 }
