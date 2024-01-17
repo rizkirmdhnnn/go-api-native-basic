@@ -3,6 +3,7 @@ package transactioncontroller
 import (
 	"encoding/json"
 	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"go-api-native-basic/config"
 	"go-api-native-basic/helper"
@@ -74,6 +75,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var admin models.Admin
+	c, _ := r.Cookie("Token")
+	claims := &config.JWTClaim{}
+	token, _ := jwt.ParseWithClaims(c.Value, claims, func(token *jwt.Token) (interface{}, error) {
+		return config.JWT_KEY, nil
+	})
+
+	if token.Valid {
+		transaction.AdminID = claims.ID
+	}
+
 	if err := config.DB.First(&admin, transaction.AdminID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helper.Response(w, 500, "Admins with this id do not exist", nil)

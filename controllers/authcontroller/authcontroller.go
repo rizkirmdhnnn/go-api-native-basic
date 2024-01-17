@@ -39,6 +39,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	expTime := time.Now().Add(time.Minute * 60)
 	claims := config.JWTClaim{
+		ID:       user.ID,
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "library-book",
