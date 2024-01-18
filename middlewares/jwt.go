@@ -34,8 +34,8 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			// Invalid signature
 			fmt.Println("Invalid signature")
 		case errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet):
-			// Token is either expired or not active yet
-			fmt.Println("Timing is everything")
+			helper.Response(w, 400, "Token Expired, please login again", nil)
+			return
 		default:
 			helper.Response(w, 400, err.Error(), nil)
 			return

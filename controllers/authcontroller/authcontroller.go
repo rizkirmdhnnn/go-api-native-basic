@@ -13,16 +13,22 @@ import (
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	//Create var
 	var userInput models.Admin
+
+	//Decode data from request body
 	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
 		helper.Response(w, 500, err.Error(), nil)
 		return
 	}
+	//Close connection request body
 	defer r.Body.Close()
 
 	var user models.Admin
+	//Find username in db
 	if err := config.DB.Where("username = ?", userInput.Username).First(&user).Error; err != nil {
 		switch {
+		//If username not found
 		case errors.Is(err, gorm.ErrRecordNotFound):
 			helper.Response(w, 400, "username not found", nil)
 			return
@@ -32,12 +38,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Checking password hash
 	if err := helper.CheckPasswordHash(userInput.Password, user.Password); err != true {
 		helper.Response(w, 400, "Wrong password", nil)
 		return
 	}
 
+	//Create var expired token
 	expTime := time.Now().Add(time.Minute * 60)
+
+	//Create JwtToken
 	claims := config.JWTClaim{
 		ID:       user.ID,
 		Username: user.Username,
@@ -47,6 +57,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	//using algorithm hs256
 	tokenAlogitm := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	token, err := tokenAlogitm.SignedString(config.JWT_KEY)
@@ -55,6 +66,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Set jwt token to cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Token",
 		Path:     "/",
@@ -66,6 +78,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 }
 func Logout(w http.ResponseWriter, r *http.Request) {
+	//Remove cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "Token",
 		Path:     "/",
