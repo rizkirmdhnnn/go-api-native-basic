@@ -3,7 +3,6 @@ package transactioncontroller
 import (
 	"encoding/json"
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"go-api-native-basic/config"
 	"go-api-native-basic/helper"
@@ -35,6 +34,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	var transaction models.Transactions
+	adminInfo := r.Context().Value("adminInfo").(*helper.MyCustomClaims)
 
 	if err := json.NewDecoder(r.Body).Decode(&transaction); err != nil {
 		helper.Response(w, 400, err.Error(), nil)
@@ -48,8 +48,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := config.DB.
 		Where("member_id = ? AND book_id = ? AND return_date = ?", transaction.MemberID, transaction.BookID, "").
-		First(&transaction).
-		Error; err == nil {
+		First(&transaction).Error; err == nil {
 		helper.Response(w, 409, "The member still borrowed the book and has not returned it!", nil)
 		return
 	}
@@ -75,16 +74,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var admin models.Admin
-	c, _ := r.Cookie("Token")
-	claims := &config.JWTClaim{}
-	token, _ := jwt.ParseWithClaims(c.Value, claims, func(token *jwt.Token) (interface{}, error) {
-		return config.JWT_KEY, nil
-	})
-
-	if token.Valid {
-		transaction.AdminID = claims.ID
-	}
-
+	transaction.AdminID = adminInfo.AdminID
 	if err := config.DB.First(&admin, transaction.AdminID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			helper.Response(w, 500, "Admins with this id do not exist", nil)
