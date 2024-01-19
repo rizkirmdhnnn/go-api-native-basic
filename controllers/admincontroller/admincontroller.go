@@ -37,7 +37,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	//Search for the same username
-	if err := config.DB.Where("username = ?", admin.Username).First(&admin).Error; err == nil {
+	if err := config.DB.Where("username = ?", admin.Username).First(&admin); err != nil {
 		helper.Response(w, 400, "Username already exists", nil)
 		return
 	}
