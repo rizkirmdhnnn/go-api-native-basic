@@ -3,13 +3,11 @@ package authcontroller
 import (
 	"encoding/json"
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
 	"go-api-native-basic/config"
 	"go-api-native-basic/helper"
 	"go-api-native-basic/models"
 	"gorm.io/gorm"
 	"net/http"
-	"time"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -44,43 +42,52 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Create var expired token
-	expTime := time.Now().Add(time.Minute * 60)
-
-	//Create JwtToken
-	claims := config.JWTClaim{
-		ID:       user.ID,
-		Username: user.Username,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "library-book",
-			ExpiresAt: jwt.NewNumericDate(expTime),
-		},
-	}
-
-	//using algorithm hs256
-	tokenAlogitm := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	token, err := tokenAlogitm.SignedString(config.JWT_KEY)
+	//Create access token JWT
+	accessToken, err := helper.CreateAccessToken(&user)
 	if err != nil {
 		helper.Response(w, 500, err.Error(), nil)
 		return
 	}
 
-	//Set jwt token to cookie
+	//Create refresh token JWT
+	refreshToken, err := helper.CreateRefreshToken(&user)
+	if err != nil {
+		helper.Response(w, 500, err.Error(), nil)
+		return
+	}
+
+	//Set access token to cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "Token",
+		Name:     "Authorization",
 		Path:     "/",
-		Value:    token,
+		Value:    accessToken,
 		HttpOnly: true,
 	})
 
+	//Set refresh token to cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Refresh",
+		Path:     "/",
+		Value:    refreshToken,
+		HttpOnly: true,
+	})
 	helper.Response(w, 200, "Success Login", nil)
 
 }
 func Logout(w http.ResponseWriter, r *http.Request) {
-	//Remove cookie
+
+	//Remove access token cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:     "Token",
+		Name:     "Authorization",
+		Path:     "/",
+		Value:    "",
+		HttpOnly: true,
+		MaxAge:   -1,
+	})
+
+	//Remove refresh token cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "Refresh",
 		Path:     "/",
 		Value:    "",
 		HttpOnly: true,
