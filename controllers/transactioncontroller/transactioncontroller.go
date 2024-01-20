@@ -48,7 +48,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err := config.DB.
 		Where("member_id = ? AND book_id = ? AND return_date = ?", transaction.MemberID, transaction.BookID, "").
-		First(&transaction); err != nil {
+		Find(&transaction).Error; err != nil {
 		helper.Response(w, 409, "The member still borrowed the book and has not returned it!", nil)
 		return
 	}
@@ -121,7 +121,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	if err := config.DB.
 		Where("member_id = ? AND book_id = ? AND return_date != ?", transaction.MemberID, transaction.BookID, "").
-		First(&transaction); err != nil {
+		Find(&transaction).Error; err != nil {
 		helper.Response(w, 409, "Book has been returned!", nil)
 		return
 	}
