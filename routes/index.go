@@ -11,4 +11,5 @@ func RouteIndex(r *mux.Router) {
 	AdminRoutes(api)
 	TransactionRouter(api)
 	AuthRouter(api)
+	InformationRouter(api)
 }
