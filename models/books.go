@@ -40,5 +40,5 @@ type BookResponseTransaction struct {
 }
 
 type TotalBooks struct {
-	Total int64 `json:"total"`
+	TotalBooks int64 `json:"total_books"`
 }
